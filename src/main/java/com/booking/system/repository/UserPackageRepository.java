@@ -18,6 +18,7 @@ public interface UserPackageRepository extends JpaRepository<UserPackage, Long> 
         SELECT up FROM UserPackage up
         WHERE up.user.id = :userId
         AND up.aPackage.country.code = :countryCode
+        AND up.expired = false
         AND up.expiryDate >= :currentDate
         AND up.remainingCredits >= 1
         ORDER BY up.expiryDate ASC
