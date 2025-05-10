@@ -35,4 +35,11 @@ public class BookingController {
         log.info("Request to cancel book class with book id {}", bookingId);
         return ResponseEntity.ok(bookingService.cancelBooking(userDetails.getUsername(), bookingId));
     }
+
+    @PostMapping("/api/user/check-in")
+    public ResponseEntity<String> checkInClass(@AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestParam Long bookingId) {
+        log.info("Request to check in class with book id {}", bookingId);
+        return ResponseEntity.ok(bookingService.checkInToClass(userDetails.getUsername(), bookingId));
+    }
 }

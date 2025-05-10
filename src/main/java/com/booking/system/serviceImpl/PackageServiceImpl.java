@@ -4,6 +4,7 @@ import com.booking.system.entity.Package;
 import com.booking.system.repository.CountryRepository;
 import com.booking.system.repository.PackageRepository;
 import com.booking.system.service.PackageService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -22,6 +23,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
+    @Cacheable(value = "availablePackages", key = "#countryCode")
     public List<Package> getAvailablePackages(String countryCode) {
         return countryRepository.findByCode(countryCode)
             .map(packageRepository::findAvailablePackagesByCountry)

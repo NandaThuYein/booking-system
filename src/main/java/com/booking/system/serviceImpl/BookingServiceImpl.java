@@ -1,6 +1,7 @@
 package com.booking.system.serviceImpl;
 
 import com.booking.system.entity.*;
+import com.booking.system.entity.Package;
 import com.booking.system.repository.BookingRepository;
 import com.booking.system.repository.ClassScheduleRepository;
 import com.booking.system.repository.UserPackageRepository;
@@ -67,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setUser(user);
         booking.setClassSchedule(classSchedule);
         booking.setBookingTime(LocalDateTime.now());
+        booking.setUserPackage(userPackage);
 
         if (classSchedule.getMaxSlots() > 0) {
             booking.setStatus(BookingStatus.BOOKED);
@@ -82,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(BookingStatus.WAIT_LISTED);
             bookingRepository.save(booking);
-            return "Class is full. You've been added to the waitlist.";
+            return "Class is full. You've been added to the waitList.";
         }
     }
 
@@ -119,6 +121,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELED);
+        booking.setCancelTime(LocalDateTime.now());
         bookingRepository.save(booking);
 
         schedule.setMaxSlots(schedule.getMaxSlots() + 1);
@@ -147,5 +150,59 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return refund ? "Booking canceled. Credit refunded." : "Booking canceled. No refund due to late cancellation.";
+    }
+
+    @Override
+    @Transactional
+    public String checkInToClass(String email, Long bookingId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (!booking.getUser().getId().equals(user.getId())) {
+            return "Unauthorized to check in.";
+        }
+
+        if (booking.getStatus() != BookingStatus.BOOKED) {
+            return "Only booked classes can be checked in.";
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        ClassSchedule schedule = booking.getClassSchedule();
+
+        if (now.isBefore(schedule.getStartTime())) {
+            return "You can only check in when class starts.";
+        }
+
+        if (now.isAfter(schedule.getEndTime())) {
+            return "Class has already ended. You missed check-in.";
+        }
+
+        boolean paymentSuccess = paymentCharge(user, booking.getUserPackage().getaPackage());
+
+        if (!paymentSuccess) {
+            return "Payment failed. Please check your payment details.";
+        }
+
+        booking.setStatus(BookingStatus.CHECKED_IN);
+        bookingRepository.save(booking);
+
+        return "Check-in successful!";
+    }
+
+    private boolean paymentCharge(User user, Package selectedPackage) {
+
+        UserPackage userPackage = userPackageRepository.findValidPackage(user.getId(),
+                selectedPackage.getCountry().getCode(), LocalDate.now());
+
+        if (userPackage != null && userPackage.getRemainingCredits() > 0) {
+            userPackage.setRemainingCredits(userPackage.getRemainingCredits() - 1);
+            userPackageRepository.save(userPackage);
+            return true;
+        }
+
+        return false;
     }
 }
