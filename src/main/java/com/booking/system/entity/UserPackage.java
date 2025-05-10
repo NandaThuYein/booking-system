@@ -21,7 +21,7 @@ public class UserPackage implements Serializable {
     private Long id;
 
     @ManyToOne
-    private Country country;
+    private User user;
 
     @ManyToOne
     private Package aPackage;
@@ -47,12 +47,12 @@ public class UserPackage implements Serializable {
         return this;
     }
 
-    public Country getCountry() {
-        return country;
+    public User getUser() {
+        return user;
     }
 
-    public UserPackage setCountry(Country country) {
-        this.country = country;
+    public UserPackage setUser(User user) {
+        this.user = user;
         return this;
     }
 

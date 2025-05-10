@@ -2,6 +2,7 @@ package com.booking.system.service;
 
 
 import com.booking.system.dto.UserDTO;
+import com.booking.system.entity.User;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;

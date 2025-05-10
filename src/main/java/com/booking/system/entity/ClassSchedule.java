@@ -39,9 +39,6 @@ public class ClassSchedule implements Serializable {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
-    @Column(name = "completed")
-    private boolean completed;
-
     @OneToMany(mappedBy = "classSchedule", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Booking> bookings;
 
@@ -105,15 +102,6 @@ public class ClassSchedule implements Serializable {
 
     public ClassSchedule setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
-        return this;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public ClassSchedule setCompleted(boolean completed) {
-        this.completed = completed;
         return this;
     }
 
