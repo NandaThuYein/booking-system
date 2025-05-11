@@ -14,4 +14,10 @@ public interface UserService {
     public String userRegister(String email, String password, String name, String country);
 
     ResponseEntity<?> userProfile();
+
+    public String changePassword(String email, String oldPassword, String newPassword);
+
+    public String requestResetPassword(String email);
+
+    public String resetPassword(String token, String newPassword);
 }
